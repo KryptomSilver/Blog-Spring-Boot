@@ -1,12 +1,19 @@
 package com.sistema.blog.models;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "publicaciones", uniqueConstraints = { @UniqueConstraint(columnNames = { "titulo" }) })
@@ -24,6 +31,10 @@ public class Publicacion {
 
 	@Column(name = "contenido", nullable = false)
 	private String contenido;
+
+	@JsonBackReference
+	@OneToMany(mappedBy = "publicacion", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<Comentario> comentarios = new HashSet<>();
 
 	public Long getId() {
 		return id;
@@ -55,6 +66,14 @@ public class Publicacion {
 
 	public void setContenido(String contenido) {
 		this.contenido = contenido;
+	}
+
+	public Set<Comentario> getComentarios() {
+		return comentarios;
+	}
+
+	public void setComentarios(Set<Comentario> comentarios) {
+		this.comentarios = comentarios;
 	}
 
 	public Publicacion() {
