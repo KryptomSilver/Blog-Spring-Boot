@@ -4,9 +4,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.sistema.blog.dto.PublicacionDTO;
+import com.sistema.blog.dto.PublicacionRespuesta;
 import com.sistema.blog.exceptions.ResourceNotFoundException;
 import com.sistema.blog.models.Publicacion;
 import com.sistema.blog.repositories.PublicacionRepositorio;
@@ -25,9 +30,23 @@ public class PublicacionServicioImp implements PublicacionServicio {
 	}
 
 	@Override
-	public List<PublicacionDTO> obtenerTodasLasPublicaciones() {
-		List<Publicacion> publicaciones = publicacionRepositorio.findAll();
-		return publicaciones.stream().map(publicacion -> mapearDTO(publicacion)).collect(Collectors.toList());
+	public PublicacionRespuesta obtenerTodasLasPublicaciones(int numeroDePagina, int medidaDePagina, String ordenarPor,
+			String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(ordenarPor).ascending()
+				: Sort.by(ordenarPor).descending();
+		Pageable pageable = PageRequest.of(numeroDePagina, medidaDePagina, sort);
+		Page<Publicacion> publicaciones = publicacionRepositorio.findAll(pageable);
+		List<Publicacion> listaPublicaciones = publicaciones.getContent();
+		List<PublicacionDTO> contenido = listaPublicaciones.stream().map(publicacion -> mapearDTO(publicacion))
+				.collect(Collectors.toList());
+		PublicacionRespuesta publicacionRespuesta = new PublicacionRespuesta();
+		publicacionRespuesta.setContenido(contenido);
+		publicacionRespuesta.setNumeroPagina(numeroDePagina);
+		publicacionRespuesta.setMedidaPagina(medidaDePagina);
+		publicacionRespuesta.setTotalElementos(publicaciones.getTotalElements());
+		publicacionRespuesta.setTotalPaginas(publicaciones.getTotalPages());
+		publicacionRespuesta.setUltima(publicaciones.isLast());
+		return publicacionRespuesta;
 	}
 
 	@Override
@@ -53,9 +72,9 @@ public class PublicacionServicioImp implements PublicacionServicio {
 		Publicacion publicacion = publicacionRepositorio.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Publicación", "id", id));
 		publicacionRepositorio.delete(publicacion);
-		
+
 	}
-	
+
 	// Convierte entidad a DTO
 	private PublicacionDTO mapearDTO(Publicacion publicacion) {
 		PublicacionDTO publicacionDTO = new PublicacionDTO();
