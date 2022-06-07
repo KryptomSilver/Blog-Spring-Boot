@@ -2,6 +2,8 @@ package com.sistema.blog.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,14 +41,14 @@ public class ComentarioControlador {
 
 	@PostMapping("/publicaciones/{publicacionId}/comentarios")
 	public ResponseEntity<ComentarioDTO> guardarComentario(@PathVariable(value = "publicacionId") long publicacionId,
-			@RequestBody ComentarioDTO comentarioDTO) {
+			@Valid @RequestBody ComentarioDTO comentarioDTO) {
 		return new ResponseEntity<>(comentarioServicio.crearComentario(publicacionId, comentarioDTO),
 				HttpStatus.CREATED);
 	}
 
 	@PutMapping("/publicaciones/{publicacionId}/comentarios/{id}")
 	public ResponseEntity<ComentarioDTO> actualizarComentario(@PathVariable(value = "publicacionId") Long publicacionId,
-			@PathVariable(value = "id") Long comentarioId, @RequestBody ComentarioDTO comentarioDTO) {
+			@PathVariable(value = "id") Long comentarioId, @Valid @RequestBody ComentarioDTO comentarioDTO) {
 		ComentarioDTO comenatarioActualizado = comentarioServicio.actualizarComentario(publicacionId, comentarioId,
 				comentarioDTO);
 		return new ResponseEntity<>(comenatarioActualizado, HttpStatus.OK);

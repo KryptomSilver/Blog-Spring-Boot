@@ -1,3 +1,4 @@
+
 package com.sistema.blog.models;
 
 import java.util.HashSet;
